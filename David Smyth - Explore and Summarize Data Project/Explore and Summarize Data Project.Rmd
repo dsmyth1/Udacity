@@ -1,0 +1,783 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+Explore and Summarize Data Project by David Smyth
+========================================================
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# Load all of the packages that you end up using in your analysis in this code
+# chunk.
+
+# Notice that the parameter "echo" was set to FALSE for this code chunk. This
+# prevents the code from displaying in the knitted HTML output. You should set
+# echo=FALSE for all code chunks in your file, unless it makes sense for your
+# report to show the code that generated a particular plot.
+
+# The other parameters for "message" and "warning" should also be set to FALSE
+# for other code chunks once you have verified that each plot comes out as you
+# want it to. This will clean up the flow of your report.
+
+library(ggplot2)
+options(repos="https://cran.rstudio.com" )
+```
+
+```{r echo=FALSE, Load_the_Data1}
+# Load the Data
+#getwd()
+#list.files()
+pLD = read.csv('prosperLoanData.csv')
+```
+
+```{r echo=FALSE, Load_the_Data2}
+# Explore dataset
+#names(pLD)
+```
+
+```{r echo=FALSE, Load_the_Data3}
+# Explore dataset
+summary(pLD)
+```
+
+The Prosper Loan Data dataset contains 113,937 loans with 81 variables on each
+loan, including loan amount, borrower rate (or interest rate), current loan
+status, borrower income, borrower employment status, borrower credit history,
+and the latest payment information.
+
+# Univariate Plots Section
+
+```{r echo=FALSE, Univariate_Plots1}
+  summary(pLD$CreditGrade)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots2}
+ggplot(aes(x = CreditGrade), data = pLD) +
+  stat_count(width = 0.5) +
+  scale_y_log10()
+```
+
+The Credit rating that was assigned at the time the listing went live.
+Applicable for listings pre-2009 period and will only be populated for those
+listings. The y-axis is presented on a logarithmic scale.
+
+```{r echo=FALSE, Univariate_Plots3}
+  summary(pLD$LoanStatus)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots4}
+ggplot(aes(x = LoanStatus), data = pLD) +
+  stat_count(width = 0.5) +
+  scale_x_discrete() +
+  theme(axis.text.x = element_text(angle=60, hjust=1)) +
+  scale_y_log10()
+```
+
+The current status of the loan: Cancelled, Chargedoff, Completed, Current,
+Defaulted, FinalPaymentInProgress, PastDue. The PastDue status will be
+accompanied by a delinquency bucket. The y-axis is presented on a logarithmic
+scale.
+
+```{r echo=FALSE, Univariate_Plots5}
+  summary(pLD$BorrowerAPR)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots6}
+library(gridExtra)
+library(grid)
+library(lattice)
+grid.arrange( ggplot(aes(x=BorrowerAPR), 
+        data = subset(pLD,BorrowerAPR!='NA')) +
+  geom_histogram( bins = 30) ,
+   ggplot(aes(x=1, y=BorrowerAPR), 
+        data = subset(pLD,BorrowerAPR!='NA')) +
+  geom_boxplot( )  , nrow =1)
+```
+
+The Borrower's Annual Percentage Rate (APR) for the loan. 25 NA's have been
+removed in presentation of the data.
+
+```{r echo=FALSE, Univariate_Plots7}
+  summary(pLD$BorrowerRate)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots8}
+grid.arrange( ggplot(aes(x=BorrowerRate), 
+        data = pLD) +
+  geom_histogram( bins = 30) ,
+   ggplot(aes(x=1, y=BorrowerRate), 
+        data = pLD) +
+  geom_boxplot( )  , nrow =1)
+```
+
+The Borrower's interest rate for this loan.
+
+```{r echo=FALSE, Univariate_Plots9}
+  summary(pLD$ProsperRating..numeric.)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots10}
+ggplot(aes(x = ProsperRating..numeric.),
+       data = subset(pLD,ProsperRating..numeric.!='NA')) +
+  stat_count(width = 0.5) +
+  scale_x_continuous()
+```
+
+The Prosper Rating assigned at the time the listing was created: 0 - N/A,
+1 - HR, 2 - E, 3 - D, 4 - C, 5 - B, 6 - A, 7 - AA. Applicable for loans
+originated after July 2009. 29084 NA's have been removed in presentation of the
+data.
+
+```{r echo=FALSE, Univariate_Plots11}
+  summary(pLD$ProsperRating..Alpha.)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots12}
+ggplot(aes(x = ProsperRating..Alpha.), data = pLD) +
+  stat_count(width = 0.5) +
+  scale_x_discrete() +
+  theme(axis.text.x = element_text(angle=60, hjust=1))
+```
+
+The Prosper Rating assigned at the time the listing was created between AA - HR.
+Applicable for loans originated after July 2009.
+
+```{r echo=FALSE, Univariate_Plots13}
+  summary(pLD$ProsperScore)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots14}
+ggplot(aes(x = ProsperScore), data = subset(pLD,ProsperScore!='NA'),) +
+  stat_count(width = 0.5) +
+  scale_x_continuous()
+```
+
+A custom risk score built using historical Prosper data. The score ranges from
+1-10, with 10 being the best, or lowest risk score. Applicable for loans
+originated after July 2009. 29084 NA's have been removed in presentation of the
+data.
+
+```{r echo=FALSE, Univariate_Plots15}
+  summary(pLD$Occupation)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots16}
+ggplot(aes(x = Occupation), data = pLD) +
+  stat_count(width = 0.5) +
+  scale_x_discrete() +
+  theme(axis.text.x = element_text(angle=60, hjust=1)) +
+  scale_y_log10()
+```
+
+The Occupation selected by the Borrower at the time they created the listing.
+The y-axis is presented on a logarithmic scale.
+
+```{r echo=FALSE, Univariate_Plots17}
+  summary(pLD$EmploymentStatusDuration)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots18}
+ggplot(aes(x = EmploymentStatusDuration),
+       data = subset(pLD,EmploymentStatusDuration!='NA')) +
+  geom_histogram(binwidth = 10) +
+    coord_cartesian(xlim = c(0, 600))
+```
+
+The length in months of the employment status at the time the listing was
+created. The x-axis's upper range has been limited to 600 removing max outlier
+at 755.00. 7625 NA's have been removed in presentation of the data.
+
+```{r echo=FALSE, Univariate_Plots19}
+  summary(pLD$IsBorrowerHomeowner)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots20}
+ggplot(aes(x = IsBorrowerHomeowner), data = pLD) +
+  geom_bar() +
+  scale_x_discrete()
+```
+
+A Borrower will be classified as a homeowner if they have a mortgage on their
+credit profile or provide documentation confirming they are a homeowner.
+
+```{r echo=FALSE, Univariate_Plots21}
+  summary(pLD$CreditScoreRangeLower)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots22}
+ggplot(aes(x = CreditScoreRangeLower), data = subset(pLD,CreditScoreRangeLower!='NA')) +
+  geom_histogram(binwidth = 10) +
+  coord_cartesian(xlim = c(450, 900))
+```
+
+The lower value representing the range of the borrower's credit score as
+provided by a consumer credit rating agency. The x-axis's upper and lower range
+has been limited to 450 to 900 removing min outlier at 0.0. 591 NA's have been
+removed in presentation of the data.
+
+```{r echo=FALSE, Univariate_Plots23}
+  summary(pLD$CreditScoreRangeUpper)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots24}
+ggplot(aes(x = CreditScoreRangeUpper),
+       data = subset(pLD,CreditScoreRangeUpper!='NA')) +
+  geom_histogram(binwidth = 10) +
+  coord_cartesian(xlim = c(450, 900))
+```
+
+The upper value representing the range of the borrower's credit score as
+provided by a consumer credit rating agency. The x-axis's upper and lower range
+has been limited to 450 to 900 removing min outlier at 19.0. 591 NA's have been
+removed in presentation of the data.
+
+```{r echo=FALSE, Univariate_Plots25}
+  summary(pLD$CurrentDelinquencies)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots26}
+ggplot(aes(x = CurrentDelinquencies),
+       data = subset(pLD,CurrentDelinquencies!='NA')) +
+  geom_histogram(binwidth = 1) +
+    coord_cartesian(xlim = c(0, 20))
+```
+
+Number of accounts delinquent at the time the credit profile was pulled. The
+x-axis's upper range has been limited to 20 removing max outlier at 83.0000. 697
+NA's have been removed in presentation of the data.
+
+```{r echo=FALSE, Univariate_Plots27}
+  summary(pLD$AmountDelinquent)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots28}
+ggplot(aes(x = AmountDelinquent), data = subset(pLD,AmountDelinquent!='NA')) +
+  geom_histogram(binwidth = 10) +
+    scale_x_sqrt() +
+    coord_cartesian(xlim = c(0, 50000))
+```
+
+Dollars delinquent at the time the credit profile was pulled. The x-axis's upper
+range has been limited to 50000 removing max outlier at 463881.0. 7622 NA's have
+been removed in presentation of the data.
+
+```{r echo=FALSE, Univariate_Plots29}
+  summary(pLD$BankcardUtilization)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots30}
+ggplot(aes(x = BankcardUtilization),
+       data = subset(pLD,BankcardUtilization!='NA')) +
+  geom_histogram(binwidth = .1) +
+  coord_cartesian(xlim = c(0, 2.0))
+```
+
+The percentage of available revolving credit that is utilized at the time the
+credit profile was pulled. The x-axis's upper range has been limited to 2.0
+removing max outlier at 5.950. 7604 NA's have been removed in presentation of
+the data.
+
+```{r echo=FALSE, Univariate_Plots31}
+  summary(pLD$DebtToIncomeRatio)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots32}
+ggplot(aes(x = DebtToIncomeRatio), data = subset(pLD,DebtToIncomeRatio!='NA')) +
+  geom_histogram(binwidth = .1) +
+    coord_cartesian(xlim = c(0, 1.5))
+```
+
+The debt to income ratio of the borrower at the time the credit profile was
+pulled. This value is Null if the debt to income ratio is not available. This
+value is capped at 10.01 (any debt to income ratio larger than 1000% will be
+returned as 1001%). The x-axis's upper range has been limited to 1.5
+removing max outlier at 10.010. 8554 NA's have been
+removed in presentation of the data.
+
+```{r echo=FALSE, Univariate_Plots33}
+  summary(pLD$IncomeRange)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots34}
+ggplot(aes(x = IncomeRange), data = pLD) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle=60, hjust=1))
+```
+
+The income range of the borrower at the time the listing was created.
+
+```{r echo=FALSE, Univariate_Plots35}
+  summary(pLD$IncomeVerifiable)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots36}
+ggplot(aes(x = IncomeVerifiable), data = pLD) +
+  geom_bar()
+```
+
+The borrower indicated they have the required documentation to support their
+income.
+
+```{r echo=FALSE, Univariate_Plots37}
+  summary(pLD$StatedMonthlyIncome)
+```
+```{r echo=FALSE, warning=FALSE, Univariate_Plots38}
+ggplot(aes(x = StatedMonthlyIncome), data = pLD) +
+  geom_histogram(binwidth = 10) +
+  scale_x_sqrt() +
+  coord_cartesian(xlim = c(0, 50000))
+```
+
+The monthly income the borrower stated at the time the listing was created. The
+x-axis is presented on a square root scale and has been limited to 50000
+removing max outlier at 1750003.
+
+```{r echo=FALSE, Univariate_Plots39}
+  summary(pLD$LoanOriginalAmount)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots40}
+ggplot(aes(x = LoanOriginalAmount), data = pLD) +
+  geom_histogram(binwidth = 1) +
+  scale_x_sqrt() +
+  scale_y_log10()
+```
+
+The origination amount of the loan. The y-axis is presented on a logarithmic
+scale, the x-axis is presented on a square root scale.
+
+```{r echo=FALSE, Univariate_Plots41}
+  summary(pLD$MonthlyLoanPayment)
+```
+
+```{r echo=FALSE, warning=FALSE, Univariate_Plots42}
+ggplot(aes(x = MonthlyLoanPayment), data = pLD) +
+    geom_histogram(binwidth = 10) +
+    coord_cartesian(xlim = c(0, 1500))
+```
+
+The scheduled monthly loan payment. The x-axis's upper range has been limited to
+1500 removing max outlier at 2251.5.
+
+# Univariate Analysis
+
+### What is the structure of your dataset?
+
+This dataset contains 113,937 loans with 81 variables on each loan, including
+loan amount, borrower rate (or interest rate), current loan status, borrower
+income, borrower employment status, borrower credit history, and the latest
+payment information.
+
+### What is/are the main feature(s) of interest in your dataset?
+
+The main feature of interest will be ProsperScore, a score of risk on a scale of
+1 to 10; how it is likely determined, and what factors play a hand in
+influencing it.
+
+### What other features in the dataset do you think will help support your \
+investigation into your feature(s) of interest?
+
+Features indicating the customer's ability to take on debt, such as Occupation,
+CreditScoreRange, DebtToIncomeRatio, etc.
+
+### Did you create any new variables from existing variables in the dataset?
+
+No new variables have been created in the investigation of this dataset, 81 are
+more than enough!
+
+### Of the features you investigated, were there any unusual distributions? \
+Did you perform any operations on the data to tidy, adjust, or change the \
+form of the data? If so, why did you do this?
+
+In general all features were investigated utilizing histograms of various bin
+widths and sizes, some scaling of the x-axis using scale_x_sqrt() and some
+scaling of the y-axis using  scale_y_log10(). x.element_text was used to
+facilitate the reading of tags and coord_cartesian() and x_lim was used to limit
+the x-axis. Otherwise, geom_bar() was used to indicate True or False as with
+IncomeVerifiable or IsBorrowerHomeowner.
+
+# Bivariate Plots Section
+
+```{r echo=FALSE, Bivariate_Plots1}
+summary(pLD$EmploymentStatus)
+```
+
+```{r echo=FALSE, warning=FALSE, Bivariate_Plots2}
+qplot(x = EmploymentStatus, y = ProsperScore,
+      data = pLD,
+      geom = 'boxplot')
+```
+
+Bivariate boxplot plotting ProsperScore on the y-axis as a function of
+EmploymentStatus. Curiously, Self-employed garners a lower ProsperScore than Not
+employed as evidenced by a comparison of each of the medians in the
+interquartile range of the associated boxplots.
+
+```{r echo=FALSE, Bivariate_Plots3}
+summary(pLD$IsBorrowerHomeowner)
+```
+
+```{r echo=FALSE, warning=FALSE, Bivariate_Plots4}
+qplot(x = IsBorrowerHomeowner, y = ProsperScore,
+      data = pLD,
+      geom = 'boxplot')
+```
+
+Bivariate boxplot plotting ProsperScore as a function of IsBorrowerHomeowner,
+as evidenced by the nearly identical medians in both the boxplot's interquartile
+range, owning a home has no appreciable effect upon one's ProsperScore.
+
+```{r echo=FALSE, Bivariate_Plots5}
+summary(pLD$CreditScoreRangeLower)
+```
+
+```{r echo=FALSE, warning=FALSE, Bivariate_Plots6}
+ggplot(data = subset(pLD,CreditScoreRangeLower!='NA'),
+       aes(CreditScoreRangeLower, ProsperScore)) +
+  geom_boxplot(aes(group = cut_width(CreditScoreRangeLower, .25)))
+```
+
+Bivariate boxplot plotting ProsperScore as a function of
+CreditScoreRangeLower, as evidenced by the median in CreditScoreRangeLower
+boxplot's interquartile range, CreditScoreRangeLower is positively correlated
+with ProsperScore. 591 NA's have been removed in presentation of the data.
+
+```{r echo=FALSE, Bivariate_Plots7}
+summary(pLD$DebtToIncomeRatio)
+```
+
+```{r echo=FALSE, warning=FALSE, Bivariate_Plots8}
+ ggplot(aes(factor(ProsperScore), 
+            DebtToIncomeRatio), 
+        data = subset(pLD,ProsperScore!='NA')) +
+  geom_jitter( alpha = .1)  + 
+  geom_boxplot( alpha = .5,color = 'blue')+ 
+  stat_summary(fun.y = "mean", 
+               geom = "point", 
+               color = "red", 
+               shape = 8, 
+               size = 4)  +
+   ylim(0,1)
+```
+Bivariate multi-plot of DebtToIncomeRatio as a function of ProsperScore with
+red point stat_summary indicating the ProsperScore mean. ProsperScore is
+negatively correlated with DebtToIncomeRatio.
+
+```{r echo=FALSE, Bivariate_Plots9}
+summary(pLD$IncomeRange)
+```
+
+```{r echo=FALSE, warning=FALSE, Bivariate_Plots10}
+ggplot(pLD, aes(ProsperScore, IncomeRange)) +
+  geom_boxplot(aes(group = cut_width(ProsperScore, 0.25)))
+```
+
+Bivariate boxplot plotting ProsperScore as a function of IncomeRange, within
+$25,000 - 74,999 IncomeRange, ProsperScore appears uniformly distributed.
+
+```{r echo=FALSE, Bivariate_Plots11}
+summary(pLD$StatedMonthlyIncome)
+```
+
+```{r echo=FALSE, warning=FALSE, Bivariate_Plots12}
+ggplot(pLD, aes(ProsperScore, StatedMonthlyIncome)) +
+  geom_boxplot(aes(group = cut_width(ProsperScore, 0.25))) +
+  scale_y_log10()
+```
+
+Bivariate boxplot plotting ProsperScore as a function of StatedMonthlyIncome,
+on a logarithmic scale, approaching 1e+04 StatedMonthlyIncome, ProsperScore
+appears uniformly distributed.
+
+```{r echo=FALSE, warning=FALSE, Bivariate_Plots13}
+ ggplot(aes(factor(ProsperScore), 
+            StatedMonthlyIncome), 
+        data = subset(pLD,ProsperScore!='NA')) +
+  geom_jitter( alpha = .1)  + 
+  geom_boxplot( alpha = .5,color = 'blue')+ 
+  stat_summary(fun.y = "mean", 
+               geom = "point", 
+               color = "red", 
+               shape = 8, 
+               size = 4)  +
+  scale_y_log10()
+```
+
+Bivariate multi-plot of StatedMonthlyIncome as a function of ProsperScore with
+red point stat_summary indicating the ProsperScore mean. ProsperScore is
+uniformly distributed approaching 1e+04 on a logarithmic scale.
+
+```{r echo=FALSE, Bivariate_Plots14}
+summary(pLD$MonthlyLoanPayment)
+```
+
+```{r echo=FALSE, warning=FALSE, Bivariate_Plots15}
+ggplot(pLD, aes(ProsperScore, MonthlyLoanPayment)) +
+  geom_boxplot(aes(group = cut_width(ProsperScore, 0.25)))
+```
+
+Bivariate boxplot plotting MonthlyLoanPayment as a function of ProsperScore,
+ProsperScore appears slightly positively correlated below 500.
+
+```{r echo=FALSE, warning=FALSE, Bivariate_Plots16}
+ ggplot(aes(factor(ProsperScore), 
+            MonthlyLoanPayment), 
+        data = subset(pLD,ProsperScore!='NA')) +
+  geom_jitter( alpha = .1)  + 
+  geom_boxplot( alpha = .5,color = 'blue')+ 
+  stat_summary(fun.y = "mean", 
+               geom = "point", 
+               color = "red", 
+               shape = 8, 
+               size = 4)
+```
+
+Bivariate multi-plot of MonthlyLoanPayment as a function of ProsperScore with
+red point stat_summary indicating the ProsperScore mean. ProsperScore appears
+slightly positively correlated below 500.
+
+# Bivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. How did the feature(s) of interest vary with other features in \
+the dataset?
+
+Full-time EmploymentStatus seems to garner a greater ProsperScore than Not
+employed yet Not employed garners a greater ProsperScore than Self-employed.
+IsBorrowerHomeowner seems to have little bearing on ProsperScore which is
+uniformly distributed between True and False. CreditScoreRangeLower, especially
+above 800, is positively correlated with ProsperScore. A low DebtToIncomeRatio
+is initially negatively correlated to ProsperScore but then vacillates it rises
+above 2.5. IncomeRange is positively correlated with ProsperScore above 50k. In
+general, StatedMonthlyIncome seems uniformly distributed but with outliers of
+greater than 1,500,000 having lower scores than others of StatedMonthlyIncome
+250k or much less. MonthlyLoanPayment is slightly positively correlated. 
+
+### Did you observe any interesting relationships between the other features \
+(not the main feature(s) of interest)?
+
+The most interesting relationships observed were that Not employed seems to
+garner a greater ProsperScore than Self-employed, which seems counter-intuitive,
+and also that DebtToIncomeRatio fluctuates in correlation to ProsperScore as it
+rises above 2.5.
+
+### What was the strongest relationship you found?
+
+IsBorrowerHomeowner seems definitely to have no bearing whatsoever on
+ProsperScore.
+
+# Multivariate Plots Section
+
+```{r echo=FALSE, warning=FALSE, Multivariate_Plots1}
+d <- ggplot(data = subset(pLD,occupation='Computer Programmer'), 
+            aes(IsBorrowerHomeowner, ProsperScore))
+d + geom_bin2d()
+```
+
+Multivariate plot of ProsperScore as a function of IsBorrowerHomeowner for
+Computer Programmer occupation, as evidenced by nearly identical shading across
+almost all color bars, IsBorrowerHomeowner appears to have no correlation to
+ProsperScore. 
+
+```{r echo=FALSE, warning=FALSE, Multivariate_Plots2}
+d <- ggplot(data = subset(pLD,occupation='Doctor'), 
+            aes(IsBorrowerHomeowner, ProsperScore))
+d + geom_bin2d()
+```
+
+Multivariate plot of ProsperScore as a function of IsBorrowerHomeowner for
+Doctor occupation, as evidenced by nearly identical shading across almost
+all color bars, IsBorrowerHomeowner appears to have no correlation to
+ProsperScore. 
+
+```{r echo=FALSE, warning=FALSE, Multivariate_Plots3}
+d <- ggplot(data = subset(pLD,occupation='Tradesman - Plumber'), 
+            aes(IsBorrowerHomeowner, ProsperScore))
+d + geom_bin2d()
+```
+
+Multivariate plot of ProsperScore as a function of IsBorrowerHomeowner for
+Tradesman - Plumber occupation, as evidenced by nearly identical shading across
+almost all color bars, Tradesman - Plumber appears to have no correlation to
+ProsperScore.
+
+```{r echo=FALSE, warning=FALSE, Multivariate_Plots4}
+ggplot(aes(y = CreditScoreRangeLower, 
+           x = factor(ProsperScore) ), 
+       data = subset (pLD, Occupation=='Computer Programmer' | 
+                        Occupation=='Doctor' | 
+                        Occupation== 'Tradesman - Plumber')) + 
+   geom_boxplot( aes(fill= Occupation))  +
+  scale_fill_brewer(type='seq')
+```
+
+Multivariate plot of CreditScoreRangeLower as a function of ProsperScore for
+Computer Programmer, Doctor and Tradesman - Plumber occupations,
+CreditScoreRangeLower appears slightly positively correlated with ProsperScore
+for all three occupations.
+
+```{r echo=FALSE, warning=FALSE, Multivariate_Plots5}
+ggplot(aes(y = CreditScoreRangeUpper, 
+           x = factor(ProsperScore) ), 
+       data = subset (pLD,Occupation=='Computer Programmer' | 
+                        Occupation=='Doctor' | 
+                        Occupation== 'Tradesman - Plumber')) + 
+   geom_boxplot( aes(fill= Occupation))  +
+  scale_fill_brewer(type='seq')
+```
+
+Multivariate plot of CreditScoreRangeUpper as a function of ProsperScore for
+Computer Programmer, Doctor and Tradesman - Plumber occupations,
+CreditScoreRangeUpper appears slightly positively correlated with ProsperScore
+for all three occupations.
+
+```{r echo=FALSE, warning=FALSE, Multivariate_Plots6}
+ggplot(aes(y = DebtToIncomeRatio, 
+           x = factor(ProsperScore) ), 
+       data = subset (pLD,Occupation=='Computer Programmer' | 
+                        Occupation=='Doctor' | 
+                        Occupation== 'Tradesman - Plumber')) + 
+   geom_boxplot( aes(fill= Occupation))  +
+  scale_fill_brewer(type='seq') +
+  scale_y_log10()
+```
+
+Multivariate plot of DebtToIncomeRatio as a function of ProsperScore for
+Computer Programmer, Doctor and Tradesman - Plumber occupations,
+DebtToIncomeRatio appears somewhat negatively correlated with
+ProsperScore for all three occupations with many outliers below the given
+median.
+
+```{r echo=FALSE, warning=FALSE, Multivariate_Plots7}
+ggplot(aes(y = StatedMonthlyIncome, 
+           x = factor(ProsperScore) ), 
+       data = subset (pLD,Occupation=='Computer Programmer' | 
+                        Occupation=='Doctor' | 
+                        Occupation== 'Tradesman - Plumber')) + 
+   geom_boxplot( aes(fill= Occupation))  +
+  scale_fill_brewer(type='seq')
+```
+
+Multivariate plot of StatedMonthlyIncome as a function of ProsperScore for
+Computer Programmer, Doctor and Tradesman - Plumber occupations,
+StatedMonthlyIncome appears slightly positively correlated with ProsperScore for
+all three occupations with a few outliers above the given median.
+
+```{r echo=FALSE, warning=FALSE, Multivariate_Plots8}
+ggplot(aes(y = MonthlyLoanPayment, 
+           x = factor(ProsperScore) ), 
+       data = subset (pLD,Occupation=='Computer Programmer' | 
+                        Occupation=='Doctor' | 
+                        Occupation== 'Tradesman - Plumber')) + 
+   geom_boxplot( aes(fill= Occupation))  +
+  scale_fill_brewer(type='seq')
+```
+
+Multivariate plot of MonthlyLoanPayment as a function of ProsperScore for
+Computer Programmer, Doctor and Tradesman - Plumber occupations,
+MonthlyLoanPayment appears somewhat positively correlated  with ProsperScore for
+all three occupations with some outliers above the given median.
+
+# Multivariate Analysis
+
+### Talk about some of the relationships you observed in this part of the \
+investigation. Were there features that strengthened each other in terms of \
+looking at your feature(s) of interest?
+
+IsBorrowerHomeowner appears evenly divided between all three occupational
+classes.
+
+For all three occupations, ProsperScore seems to roughly correspond to
+CreditScore based on the CreditScoreRangeUpper and CreditScoreRangeLower plots.
+
+DebtToIncomeRatio appears somewhat negatively correlated with
+ProsperScore for all three occupations.
+
+StatedMonthlyIncome appears slightly positively correlated with ProsperScore for
+all three occupations.
+
+MonthlyLoanPayment appears somewhat positively correlated  with ProsperScore for
+all three occupations.
+
+### Were there any interesting or surprising interactions between features?
+
+That IsBorrowerHomeowner seems evenly divided between all occupational classes
+is somewhat surprising as one would expect a greater percentage of Doctors for
+instance to own a home or that Doctor's with a previous home not to need a loan.
+Perhaps for a second home?
+
+------
+
+# Final Plots and Summary
+
+### ProsperScore as a function of EmploymentStatus
+```{r echo=FALSE, warning=FALSE, Plot_One}
+qplot(x = EmploymentStatus, y = ProsperScore,
+      data = subset(pLD,ProsperScore!='NA'),
+      geom = 'boxplot')
+```
+
+Bivariate boxplot plotting ProsperScore on the y-axis as a function of
+EmploymentStatus. Curiously, Self-employed garners a lower ProsperScore than Not
+employed as evidenced by the lesser median in the interquartile range of the
+Self-employed boxplot in comparison with the greater median in the interquartile
+range of the Not employed boxplot.
+
+### ProsperScore as a function of IsBorrowerHomeowner
+```{r echo=FALSE, warning=FALSE, Plot_Two}
+qplot(x = IsBorrowerHomeowner, y = ProsperScore,
+      data = pLD,
+      geom = 'boxplot')
+```
+
+Bivariate boxplot plotting ProsperScore as a function of IsBorrowerHomeowner,
+as evidenced by the nearly identical medians in both the boxplot's interquartile
+range, owning a home has no appreciable effect upon one's ProsperScore.
+
+### ProsperScore as a function of DebtToIncomeRatio and Occupation
+
+```{r echo=FALSE, warning=FALSE, Plot_Three}
+ggplot(aes(y = DebtToIncomeRatio, 
+           x = factor(ProsperScore) ), 
+       data = subset (pLD,Occupation=='Computer Programmer' | 
+                        Occupation=='Doctor' | 
+                        Occupation== 'Tradesman - Plumber')) + 
+   geom_boxplot( aes(fill= Occupation))  +
+  scale_fill_brewer(type='seq') +
+  scale_y_log10()
+```
+ 
+Multivariate plot of DebtToIncomeRatio as a function of ProsperScore for
+Computer Programmer, Doctor and Tradesman - Plumber occupations,
+DebtToIncomeRatio appears somewhat negatively correlated with
+ProsperScore for all three occupations with many outliers below the given
+median.
+
+------
+
+# Reflection
+
+The Prosper Loan Data is large and incorporates many variables which makes it
+difficult to decide what to focus on but after much study and reflection,
+ProsperScore presented itself as deserving a more through examination... What is
+ProsperScore, and if, presumably loans are to be granted based upon it, given
+it's proprietary nature, how is it determined.
+
+Exploring the Prosper Loan Data in regards to ProsperScore met with a few
+difficulties due to the sprawling number of variables and their size, for
+instance, plotting the entire number of Occupations listed, surpassed ggplot's
+ability to display and I was forced to settle upon three Occupations to grossly
+represent, the blue collar, white collar and professional realms so as to more
+simply and clearly delineate possible relationships.
+
+Ultimately, it seems that ProsperScore is a complex calculation that cannot be
+easily pinned down via an analysis of three variables as no doubt each of the
+Prosper dataset's 81 variables play a part in a much more complex determination
+of a customer's final Score. This conclusion is bolstered by the somewhat
+counter-intuitive findings garnered by the dataset's exploration and analysis in
+R: for instance, that someone Self-employed would receive a lower ProsperScore
+than someone Not employed, or that IsBorrowerHomeowner being True receives no
+preference in ProsperScore, or as an outlier, a Doctor's ProsperScore can rise
+the higher his DebtToIncomeRatio climbs. How these variables are offset by other
+heretofore unexamined variables can be a focus of future work within the
+dataset.
